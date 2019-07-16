@@ -1,7 +1,6 @@
-concrete RadiologyEst of Radiology =
-  open Prelude, SyntaxEst, ParadigmsEst,
-  LexiconEst, (G=GrammarEst), --(E=ExtendEst),
-  (R=ResEst) in {
+concrete RadiologyEng of Radiology =
+  open Prelude, SyntaxEng, ParadigmsEng,
+  LexiconEng, (G=GrammarEng), (E=ExtendEng), (R=ResEng) in {
 
   lincat
     Statement = S ;
@@ -20,12 +19,11 @@ concrete RadiologyEst of Radiology =
     DescribePos descr prop proof = {
         s = mkS (lin Adv proof)
                 (mkS (mkCl (mkNP prop) descr)) ;
-        adv = SyntaxEst.mkAdv (casePrep comitative) (mkNP (mkCN descr prop)) } ;
-
+        adv = SyntaxEng.mkAdv with_Prep (mkNP (mkCN descr prop)) } ;
     DescribeNeg descr prop proof = {
         s = mkS (lin Adv proof)
                 (mkS negativePol (mkCl (mkNP prop) descr)) ;
-        adv = SyntaxEst.mkAdv (prePrep abessive "ilma") (mkNP (mkCN descr prop))} ;
+        adv = SyntaxEng.mkAdv (mkPrep "not with") (mkNP (mkCN descr prop))} ;
 
     Desc2 d1 d2 = d1 ** {
       s = G.ConjS and_Conj (G.BaseS d1.s d2.s) ;
@@ -39,35 +37,35 @@ concrete RadiologyEst of Radiology =
 
     AggregateProperty2Pos dr p q pr1 pr2 = {
       s = aggregateProperty dr p q pr1 pr2 positivePol ;
-      adv = SyntaxEst.mkAdv (casePrep comitative) (mkNP (mkCN dr (prop2 p q)))
+      adv = SyntaxEng.mkAdv with_Prep (mkNP (mkCN dr (prop2 p q)))
       } ;
 
     AggregateProperty2Neg dr p q pr1 pr2 = {
       s = aggregateProperty dr p q pr1 pr2 negativePol ;
-      adv = SyntaxEst.mkAdv (prePrep abessive "ilma") (mkNP (mkCN dr (prop2 p q)))
+      adv = SyntaxEng.mkAdv (mkPrep "not with") (mkNP (mkCN dr (prop2 p q)))
       } ;
 
-    Both org = org ** {s = mkCN (mkA (mkN "mõlema" "mõlema" "mõlemat")) org.s} ;
-    Left org = {s = mkCN (mkA (mkN "vasak" "vasaku")) org.s ; pl = False} ;
-    Right org = {s = mkCN (mkA (mkN "parem" "parema")) org.s ; pl = False} ;
+    Both org = org ** {s = mkCN (mkA "both") org.s} ;
+    Left org = {s = mkCN (mkA "left") org.s ; pl = False} ;
+    Right org = {s = mkCN (mkA "right") org.s ; pl = False} ;
 
     Heart = organ heart_N ;
-    Spleen = organ (mkN "põrn" "põrna") ;
+    Spleen = organ (mkN "spleen") ;
 
-    Kidney = organ (mkN "neer" "neeru") ;
-    Ovary = dualorgan (mkN "munasari" "munasarja" "munasarja" "munasarjasse" "munasarjade" "munasarju") ;
+    Kidney = dualorgan (mkN "kidney") ;
+    Ovary = dualorgan (mkN "ovary") ;
 
-    Size = mkCN (mkN "suurus") ;
-    Location = mkCN (mkN "asetus") ;
+    Size = mkCN (mkN "size") ;
+    Location = mkCN (mkN "location") ;
 
-    Lateral = mkAP (mkA "lateraalne") ;
-    External = mkAP (mkA "väline") ;
+    Lateral = mkAP (mkA "lateral") ;
+    External = mkAP (mkA "external") ;
 
     Small = mkAP small_A ;
-    Normal = mkAP (mkA "normaalne") ;
-    Abnormal = mkAP (mkA "ebanormaalne") ;
-    Widened = mkAP (mkA "laienenud") ;
-    Microscopic = mkAP (mkA "mikroskoopiline") ;
+    Normal = mkAP (mkA "normal") ;
+    Abnormal = mkAP (mkA "abnormal") ;
+    Widened = mkAP (mkA "widened") ;
+    Microscopic = mkAP (mkA "microscopic") ;
 
     mm int = mkAP (lin AdA int) mm_A ;
     mmLessThan int = mkAP (lin AdA (cc2 {s="<"} int)) mm_A ;
@@ -77,8 +75,7 @@ oper
   prop2 : CN -> CN -> CN = \p1,p2 ->
     G.ConjCN and_Conj (G.BaseCN p1 p2) ;
 
-  --mm_A : A = mkA "mm" "mm" "mm" "mm" ;
-  mm_A : A = mkA "mm" ;
+  mm_A : A = mkA "mm" "mm" "mm" "mm" ;
 
   OrganType : Type = {s : CN ; pl : Bool} ;
 
@@ -89,12 +86,12 @@ oper
     organ n ** {pl = True} ;
 
   topicAdv : OrganType -> Adv = \org ->
-    SyntaxEst.mkAdv (casePrep genitive) (mkNP org.s) ;
+    SyntaxEng.mkAdv noPrep (mkNP (mkDet (E.GenNP (orgNP org)))) ;
 
   orgNP : OrganType -> NP = \org ->
-        case org.pl of {
-          True => mkNP aPl_Det org.s ;
-          False => mkNP org.s } ;
+    case org.pl of {
+      True => mkNP aPl_Det org.s ;
+      False => mkNP org.s } ;
 
   aggregateProperty : Descriptor -> (p1, p2 : Property)
                       -> (pr1, pr2 : SS)
@@ -102,8 +99,7 @@ oper
                       -> S ;
   aggregateProperty dr p q pr1 pr2 pol =
     mkS (lin Adv (cc2 pr1 pr2))
-        (mkS pol (mkCl (plNP (prop2 p q)) dr)
-        |mkS pol (mkCl (mkNP (prop2 p q)) dr)) ;
+        (mkS pol (mkCl (plNP (prop2 p q)) dr)) ;
 
   plNP : CN -> NP = \cn ->
     let sgnp : NP = mkNP cn ;
