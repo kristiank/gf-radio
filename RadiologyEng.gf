@@ -19,11 +19,11 @@ concrete RadiologyEng of Radiology =
     DescribePos descr prop proof = {
         s = mkS (lin Adv proof)
                 (mkS (mkCl (mkNP prop) descr)) ;
-        adv = SyntaxEng.mkAdv with_Prep (mkNP (mkCN descr prop)) } ;
+        adv = cc2 (lin Adv proof) (SyntaxEng.mkAdv with_Prep (mkNP (mkCN descr prop))) } ;
     DescribeNeg descr prop proof = {
         s = mkS (lin Adv proof)
                 (mkS negativePol (mkCl (mkNP prop) descr)) ;
-        adv = SyntaxEng.mkAdv (mkPrep "not with") (mkNP (mkCN descr prop))} ;
+        adv = cc2 (lin Adv proof) (SyntaxEng.mkAdv without_Prep (mkNP (mkCN descr prop)))} ;
 
     Desc2 d1 d2 = d1 ** {
       s = G.ConjS and_Conj (G.BaseS d1.s d2.s) ;
