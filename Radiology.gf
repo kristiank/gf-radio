@@ -5,6 +5,7 @@ flags startcat = Statement ;
   cat
     Statement ;
     Description ;
+    Descriptions ;
 
     Organ ;
     DualOrgan ;
@@ -14,24 +15,17 @@ flags startcat = Statement ;
     Descriptor ;
     Describes Descriptor Property ; -- proof objects
 
+    Number ;
+
   data
-    Pred,
-    PredAdv : Organ -> Description -> Statement ;
+    Pred : Organ -> Descriptions -> Statement ;
 
     DescribePos,
     DescribeNeg : (d : Descriptor) -> (p : Property) -> Describes d p -> Description ;
 
-    Desc2 : Description -> Description -> Description ;
-    Desc3 : Description -> Description -> Description -> Description ;
-
-    -- To make text more natural; transfer rules in Haskell
-    AggregateProperty2Pos,
-    AggregateProperty2Neg : (d : Descriptor) -> (p1, p2 : Property)
-                          -> Describes d p1
-                          -> Describes d p2
-                          -> Description ; -- size and location are normal / normaalse suuruse ja asetusega
-
-    --AggregateDescriptor2 : Property -> Descriptor -> Descriptor -> Description ; -- location is normal and lateral
+    Desc1 : Description -> Descriptions ;
+    Desc2 : Description -> Description -> Descriptions ;
+    Desc3 : Description -> Description -> Description -> Descriptions ;
 
     Both,
     Left,
@@ -53,7 +47,9 @@ flags startcat = Statement ;
     Widened,
     Microscopic : Descriptor ; -- Size descriptors
     mm,                              -- 20 mm
-    mmLessThan : Int -> Descriptor ; -- <20mm
+    mmLessThan : Number -> Descriptor ; -- <20mm
+
+    Num20 : Number ;
 
     Normal, Abnormal : Descriptor ; -- Can be any descriptor
     -- Parallel, Horizontal : Descriptor  -- Orientation descriptor
@@ -68,11 +64,6 @@ flags startcat = Statement ;
     External_Location : Describes External Location ;
     Normal_Location : Describes Normal Location ;
     Abnormal_Location : Describes Abnormal Location ;
-    mm_Size : Describes (mm 20) Size ;
-    mm_lessThan_Size : Describes (mmLessThan 20) Size ;
-
-
--- põrna suurus normis, struktuur ühtlane, kontrasteerumine iseärasusteta
--- mõlemad neerud normaalse suuruse ja asetusega
-
+    mm_Size : Describes (mm Num20) Size ;
+    mm_lessThan_Size : Describes (mmLessThan Num20) Size ;
 }

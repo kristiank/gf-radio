@@ -5,7 +5,8 @@ concrete RadiologyEst of Radiology =
 
   lincat
     Statement = S ;
-    Description = {s : S ; adv : Adv} ;
+    Description,
+    Descriptions = {s : S ; adv : Adv} ;
 
     Organ,
     DualOrgan = OrganType ;
@@ -14,8 +15,8 @@ concrete RadiologyEst of Radiology =
     Descriptor = AP ;
 
   lin
-    Pred org descn = mkS (topicAdv org) descn.s ; -- "the heart's size is normal"
-    PredAdv org descn = mkS (mkCl (orgNP org) descn.adv) ;
+    Pred org descn = mkS (mkCl (orgNP org) descn.adv) ;
+--mkS (topicAdv org) descn.s ; -- "the heart's size is normal"
 
     DescribePos descr prop proof = {
         s = mkS (lin Adv proof)
@@ -27,6 +28,8 @@ concrete RadiologyEst of Radiology =
                 (mkS negativePol (mkCl (mkNP prop) descr)) ;
         adv = SyntaxEst.mkAdv (prePrep abessive "ilma") (mkNP (mkCN descr prop))} ;
 
+    Desc1 d = d ;
+
     Desc2 d1 d2 = d1 ** {
       s = G.ConjS and_Conj (G.BaseS d1.s d2.s) ;
       adv = G.ConjAdv and_Conj (G.BaseAdv d1.adv d2.adv)} ;
@@ -36,16 +39,6 @@ concrete RadiologyEst of Radiology =
                                     (G.BaseS d1.s d2.s)
                             ) ;
       adv = G.ConjAdv and_Conj (G.ConsAdv d3.adv (G.BaseAdv d2.adv d1.adv))} ;
-
-    AggregateProperty2Pos dr p q pr1 pr2 = {
-      s = aggregateProperty dr p q pr1 pr2 positivePol ;
-      adv = SyntaxEst.mkAdv (casePrep comitative) (mkNP (mkCN dr (prop2 p q)))
-      } ;
-
-    AggregateProperty2Neg dr p q pr1 pr2 = {
-      s = aggregateProperty dr p q pr1 pr2 negativePol ;
-      adv = SyntaxEst.mkAdv (prePrep abessive "ilma") (mkNP (mkCN dr (prop2 p q)))
-      } ;
 
     Both org = org ** {s = mkCN (mkA (mkN "mõlema" "mõlema" "mõlemat")) org.s} ;
     Left org = {s = mkCN (mkA (mkN "vasak" "vasaku")) org.s ; pl = False} ;
@@ -58,7 +51,7 @@ concrete RadiologyEst of Radiology =
     Ovary = dualorgan (mkN "munasari" "munasarja" "munasarja" "munasarjasse" "munasarjade" "munasarju") ;
 
     Size = mkCN (mkN "suurus") ;
-    Location = mkCN (mkN "asetus") ;
+    Location = mkCN (mkN "asend") ;
 
     Lateral = mkAP (mkA "lateraalne") ;
     External = mkAP (mkA "väline") ;
@@ -71,7 +64,7 @@ concrete RadiologyEst of Radiology =
 
     mm int = mkAP (lin AdA int) mm_A ;
     mmLessThan int = mkAP (lin AdA (cc2 {s="<"} int)) mm_A ;
-
+    Num20 = ss "20" ;
 oper
 
   prop2 : CN -> CN -> CN = \p1,p2 ->
@@ -95,20 +88,6 @@ oper
         case org.pl of {
           True => mkNP aPl_Det org.s ;
           False => mkNP org.s } ;
-
-  aggregateProperty : Descriptor -> (p1, p2 : Property)
-                      -> (pr1, pr2 : SS)
-                      -> Pol
-                      -> S ;
-  aggregateProperty dr p q pr1 pr2 pol =
-    mkS (lin Adv (cc2 pr1 pr2))
-        (mkS pol (mkCl (plNP (prop2 p q)) dr)
-        |mkS pol (mkCl (mkNP (prop2 p q)) dr)) ;
-
-  plNP : CN -> NP = \cn ->
-    let sgnp : NP = mkNP cn ;
-        plnp : NP = mkNP aPl_Det cn ;
-     in sgnp ** {a = plnp.a} ;
 
 lin
 

@@ -1,4 +1,4 @@
-module Radiology where
+module ExtRadiology where
 
 import PGF hiding (Tree)
 ----------------------------------------------------
@@ -55,7 +55,11 @@ data GDescribes =
   deriving Show
 
 data GDescription =
-   GDescribeNeg GDescriptor GProperty GDescribes 
+   GAggregateDescriptor2Neg GProperty GDescriptor GDescriptor GDescribes GDescribes 
+ | GAggregateDescriptor2Pos GProperty GDescriptor GDescriptor GDescribes GDescribes 
+ | GAggregateProperty2Neg GDescriptor GProperty GProperty GDescribes GDescribes 
+ | GAggregateProperty2Pos GDescriptor GProperty GProperty GDescribes GDescribes 
+ | GDescribeNeg GDescriptor GProperty GDescribes 
  | GDescribePos GDescriptor GProperty GDescribes 
   deriving Show
 
@@ -98,7 +102,9 @@ data GProperty =
  | GSize 
   deriving Show
 
-data GStatement = GPred GOrgan GDescriptions 
+data GStatement =
+   GPred GOrgan GDescriptions 
+ | GPredAdv GOrgan GDescriptions 
   deriving Show
 
 
@@ -133,11 +139,19 @@ instance Gf GDescribes where
       _ -> error ("no Describes " ++ show t)
 
 instance Gf GDescription where
+  gf (GAggregateDescriptor2Neg x1 x2 x3 x4 x5) = mkApp (mkCId "AggregateDescriptor2Neg") [gf x1, gf x2, gf x3, gf x4, gf x5]
+  gf (GAggregateDescriptor2Pos x1 x2 x3 x4 x5) = mkApp (mkCId "AggregateDescriptor2Pos") [gf x1, gf x2, gf x3, gf x4, gf x5]
+  gf (GAggregateProperty2Neg x1 x2 x3 x4 x5) = mkApp (mkCId "AggregateProperty2Neg") [gf x1, gf x2, gf x3, gf x4, gf x5]
+  gf (GAggregateProperty2Pos x1 x2 x3 x4 x5) = mkApp (mkCId "AggregateProperty2Pos") [gf x1, gf x2, gf x3, gf x4, gf x5]
   gf (GDescribeNeg x1 x2 x3) = mkApp (mkCId "DescribeNeg") [gf x1, gf x2, gf x3]
   gf (GDescribePos x1 x2 x3) = mkApp (mkCId "DescribePos") [gf x1, gf x2, gf x3]
 
   fg t =
     case unApp t of
+      Just (i,[x1,x2,x3,x4,x5]) | i == mkCId "AggregateDescriptor2Neg" -> GAggregateDescriptor2Neg (fg x1) (fg x2) (fg x3) (fg x4) (fg x5)
+      Just (i,[x1,x2,x3,x4,x5]) | i == mkCId "AggregateDescriptor2Pos" -> GAggregateDescriptor2Pos (fg x1) (fg x2) (fg x3) (fg x4) (fg x5)
+      Just (i,[x1,x2,x3,x4,x5]) | i == mkCId "AggregateProperty2Neg" -> GAggregateProperty2Neg (fg x1) (fg x2) (fg x3) (fg x4) (fg x5)
+      Just (i,[x1,x2,x3,x4,x5]) | i == mkCId "AggregateProperty2Pos" -> GAggregateProperty2Pos (fg x1) (fg x2) (fg x3) (fg x4) (fg x5)
       Just (i,[x1,x2,x3]) | i == mkCId "DescribeNeg" -> GDescribeNeg (fg x1) (fg x2) (fg x3)
       Just (i,[x1,x2,x3]) | i == mkCId "DescribePos" -> GDescribePos (fg x1) (fg x2) (fg x3)
 
@@ -238,10 +252,12 @@ instance Gf GProperty where
 
 instance Gf GStatement where
   gf (GPred x1 x2) = mkApp (mkCId "Pred") [gf x1, gf x2]
+  gf (GPredAdv x1 x2) = mkApp (mkCId "PredAdv") [gf x1, gf x2]
 
   fg t =
     case unApp t of
       Just (i,[x1,x2]) | i == mkCId "Pred" -> GPred (fg x1) (fg x2)
+      Just (i,[x1,x2]) | i == mkCId "PredAdv" -> GPredAdv (fg x1) (fg x2)
 
 
       _ -> error ("no Statement " ++ show t)

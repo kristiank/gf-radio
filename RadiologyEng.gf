@@ -4,7 +4,8 @@ concrete RadiologyEng of Radiology =
 
   lincat
     Statement = S ;
-    Description = {s : S ; adv : Adv} ;
+    Description,
+    Descriptions = {s : S ; adv : Adv} ;
 
     Organ,
     DualOrgan = OrganType ;
@@ -14,7 +15,6 @@ concrete RadiologyEng of Radiology =
 
   lin
     Pred org descn = mkS (topicAdv org) descn.s ; -- "the heart's size is normal"
-    PredAdv org descn = mkS (mkCl (orgNP org) descn.adv) ;
 
     DescribePos descr prop proof = {
         s = mkS (lin Adv proof)
@@ -25,25 +25,15 @@ concrete RadiologyEng of Radiology =
                 (mkS negativePol (mkCl (mkNP prop) descr)) ;
         adv = cc2 (lin Adv proof) (SyntaxEng.mkAdv without_Prep (mkNP (mkCN descr prop)))} ;
 
+    Desc1 d = d ;
+
     Desc2 d1 d2 = d1 ** {
       s = G.ConjS and_Conj (G.BaseS d1.s d2.s) ;
       adv = G.ConjAdv and_Conj (G.BaseAdv d1.adv d2.adv)} ;
 
     Desc3 d1 d2 d3 = {
-      s = G.ConjS and_Conj (G.ConsS d3.s
-                                    (G.BaseS d1.s d2.s)
-                            ) ;
+      s = G.ConjS and_Conj (G.ConsS d3.s (G.BaseS d1.s d2.s)) ;
       adv = G.ConjAdv and_Conj (G.ConsAdv d3.adv (G.BaseAdv d2.adv d1.adv))} ;
-
-    AggregateProperty2Pos dr p q pr1 pr2 = {
-      s = aggregateProperty dr p q pr1 pr2 positivePol ;
-      adv = SyntaxEng.mkAdv with_Prep (mkNP (mkCN dr (prop2 p q)))
-      } ;
-
-    AggregateProperty2Neg dr p q pr1 pr2 = {
-      s = aggregateProperty dr p q pr1 pr2 negativePol ;
-      adv = SyntaxEng.mkAdv (mkPrep "not with") (mkNP (mkCN dr (prop2 p q)))
-      } ;
 
     Both org = org ** {s = mkCN (mkA "both") org.s} ;
     Left org = {s = mkCN (mkA "left") org.s ; pl = False} ;
@@ -69,6 +59,7 @@ concrete RadiologyEng of Radiology =
 
     mm int = mkAP (lin AdA int) mm_A ;
     mmLessThan int = mkAP (lin AdA (cc2 {s="<"} int)) mm_A ;
+    Num20 = ss "20" ;
 
 oper
 
@@ -92,19 +83,6 @@ oper
     case org.pl of {
       True => mkNP aPl_Det org.s ;
       False => mkNP org.s } ;
-
-  aggregateProperty : Descriptor -> (p1, p2 : Property)
-                      -> (pr1, pr2 : SS)
-                      -> Pol
-                      -> S ;
-  aggregateProperty dr p q pr1 pr2 pol =
-    mkS (lin Adv (cc2 pr1 pr2))
-        (mkS pol (mkCl (plNP (prop2 p q)) dr)) ;
-
-  plNP : CN -> NP = \cn ->
-    let sgnp : NP = mkNP cn ;
-        plnp : NP = mkNP aPl_Det cn ;
-     in sgnp ** {a = plnp.a} ;
 
 lin
 
